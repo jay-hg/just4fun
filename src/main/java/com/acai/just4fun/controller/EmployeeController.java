@@ -2,6 +2,7 @@ package com.acai.just4fun.controller;
 
 import com.acai.just4fun.dto.EmployeeDTO;
 import com.acai.just4fun.enums.EmployeeExcelEnum;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -45,6 +47,9 @@ public class EmployeeController {
                 for (Field field : fields) {
                     field.setAccessible(true);
                     Cell cell = row.getCell(EmployeeExcelEnum.getIndex(field.getName()));
+                    if (cell == null) {
+                        continue;
+                    }
                     switch (cell.getCellTypeEnum()) {
                         case NUMERIC:
                             Double dNum = cell.getNumericCellValue();
@@ -52,6 +57,11 @@ public class EmployeeController {
                             break;
                         case STRING:
                             String str = cell.getStringCellValue();
+                            NotBlank notBlank = field.getAnnotation(NotBlank.class);
+                            if (notBlank != null && StringUtils.isBlank(str)) {
+                                return notBlank.message();
+
+                            }
                             field.set(employeeDTO, str);
                             break;
                         default:
