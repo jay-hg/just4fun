@@ -1,7 +1,9 @@
 package com.acai.just4fun.controller;
 
+import com.acai.just4fun.annotation.Group;
 import com.acai.just4fun.dto.EmployeeDTO;
 import com.acai.just4fun.enums.EmployeeExcelEnum;
+import com.acai.just4fun.enums.GroupEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -60,7 +62,15 @@ public class EmployeeController {
                             NotBlank notBlank = field.getAnnotation(NotBlank.class);
                             if (notBlank != null && StringUtils.isBlank(str)) {
                                 return notBlank.message();
+                            }
 
+                            Group group = field.getAnnotation(Group.class);
+                            if (group != null) {
+                                if (StringUtils.isBlank(str)) {
+                                    return group.message();
+                                } else if(!GroupEnum.contains(str)) {
+                                    return "[group]字段非法取值";
+                                }
                             }
                             field.set(employeeDTO, str);
                             break;
