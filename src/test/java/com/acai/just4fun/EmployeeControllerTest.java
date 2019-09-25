@@ -1,5 +1,6 @@
 package com.acai.just4fun;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +43,9 @@ public class EmployeeControllerTest {
         System.out.println(result);
     }
 
+    /**
+     * 正常上传文件
+     */
     @Test
     public void testUploadExcel() {
         String result = null;
@@ -58,5 +62,50 @@ public class EmployeeControllerTest {
             e.printStackTrace();
         }
         System.out.println(result);
+        Assert.assertEquals("上传成功",result);
+    }
+
+    /**
+     * group传空字符串
+     */
+    @Test
+    public void testUploadExcel2() {
+        String result = null;
+        try {
+            ClassPathResource resource = new ClassPathResource("files/group传空字符串.xlsx");
+            MockMultipartFile file = new MockMultipartFile("file", resource.getInputStream());
+            result = mockMvc.perform(
+                    MockMvcRequestBuilders
+                            .multipart("/emp/uploadExcel")
+                            .file(file)
+            ).andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        Assert.assertEquals("所属集团不能为空",result);
+    }
+
+    /**
+     * idCard传空字符串
+     */
+    @Test
+    public void testUploadExcel3() {
+        String result = null;
+        try {
+            ClassPathResource resource = new ClassPathResource("files/idCard传空字符串.xlsx");
+            MockMultipartFile file = new MockMultipartFile("file", resource.getInputStream());
+            result = mockMvc.perform(
+                    MockMvcRequestBuilders
+                            .multipart("/emp/uploadExcel")
+                            .file(file)
+            ).andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        Assert.assertEquals("[idCardNo]不能为空",result);
     }
 }

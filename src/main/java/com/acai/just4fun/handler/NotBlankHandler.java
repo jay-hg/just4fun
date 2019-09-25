@@ -7,16 +7,9 @@ import javax.validation.constraints.NotBlank;
 import java.lang.reflect.Field;
 
 public class NotBlankHandler implements Handler {
-    private String str;
-    private Field field;
-
-    public NotBlankHandler(String str, Field field) {
-        this.str = str;
-        this.field = field;
-    }
 
     @Override
-    public String handle() {
+    public String handle(Field field,String str) {
         NotBlank notBlank = field.getAnnotation(NotBlank.class);
         if (notBlank != null && StringUtils.isBlank(str)) {
             return notBlank.message();

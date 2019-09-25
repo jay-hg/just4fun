@@ -7,16 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Field;
 
 public class GroupHandler implements Handler {
-    private Field field;
-    private String str;
-
-    public GroupHandler(String str,Field field) {
-        this.field = field;
-        this.str = str;
-    }
 
     @Override
-    public String handle() {
+    public String handle(Field field,String str) {
         Group group = field.getAnnotation(Group.class);
         if (group != null) {
             if (StringUtils.isBlank(str)) {

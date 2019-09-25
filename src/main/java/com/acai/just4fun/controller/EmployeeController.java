@@ -6,6 +6,7 @@ import com.acai.just4fun.enums.EmployeeExcelEnum;
 import com.acai.just4fun.enums.GroupEnum;
 import com.acai.just4fun.handler.GroupHandler;
 import com.acai.just4fun.handler.Handler;
+import com.acai.just4fun.handler.HandlerFactory;
 import com.acai.just4fun.handler.NotBlankHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -75,25 +76,15 @@ public class EmployeeController {
                         case STRING:
                             String str = cell.getStringCellValue();
                             for (Annotation annoattion : field.getDeclaredAnnotations()) {
-                                Handler handler = null;
-                                switch (annoattion.annotationType().getTypeName()) {
-                                    case "javax.validation.constraints.NotBlank":
-                                        handler = new NotBlankHandler(str,field);
-                                        break;
-                                    case "com.acai.just4fun.annotation.Group":
-                                        handler = new GroupHandler(str,field);
-                                        break;
-                                    default:
-                                }
+                                Handler handler = HandlerFactory.createHandler(annoattion.annotationType());
                                 if (handler == null) {
                                     continue;
                                 }
-                                String handleResult = handler.handle();
+                                String handleResult = handler.handle(field,str);
                                 if (handleResult != null) {
                                     return handleResult;
                                 }
                             }
-
 
                             field.set(employeeDTO, str);
                             break;
