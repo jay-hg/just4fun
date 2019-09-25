@@ -4,12 +4,17 @@ import com.acai.just4fun.annotation.Group;
 import com.acai.just4fun.dto.EmployeeDTO;
 import com.acai.just4fun.enums.EmployeeExcelEnum;
 import com.acai.just4fun.enums.GroupEnum;
+import com.acai.just4fun.handler.GroupHandler;
+import com.acai.just4fun.handler.Handler;
+import com.acai.just4fun.handler.NotBlankHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +32,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/emp")
 public class EmployeeController {
+
+    @PostMapping("/testValid")
+    public String testValidated(@Validated EmployeeDTO employeeDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return bindingResult.getFieldError().getDefaultMessage();
+        }
+        return "hello";
+    }
+
     @PostMapping("/uploadExcel")
     public String uploadExcel(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
@@ -59,19 +74,27 @@ public class EmployeeController {
                             break;
                         case STRING:
                             String str = cell.getStringCellValue();
-                            NotBlank notBlank = field.getAnnotation(NotBlank.class);
-                            if (notBlank != null && StringUtils.isBlank(str)) {
-                                return notBlank.message();
-                            }
-
-                            Group group = field.getAnnotation(Group.class);
-                            if (group != null) {
-                                if (StringUtils.isBlank(str)) {
-                                    return group.message();
-                                } else if(!GroupEnum.contains(str)) {
-                                    return "[group]字段非法取值";
+                            for (Annotation annoattion : field.getDeclaredAnnotations()) {
+                                Handler handler = null;
+                                switch (annoattion.annotationType().getTypeName()) {
+                                    case "javax.validation.constraints.NotBlank":
+                                        handler = new NotBlankHandler(str,field);
+                                        break;
+                                    case "com.acai.just4fun.annotation.Group":
+                                        handler = new GroupHandler(str,field);
+                                        break;
+                                    default:
+                                }
+                                if (handler == null) {
+                                    continue;
+                                }
+                                String handleResult = handler.handle();
+                                if (handleResult != null) {
+                                    return handleResult;
                                 }
                             }
+
+
                             field.set(employeeDTO, str);
                             break;
                         default:

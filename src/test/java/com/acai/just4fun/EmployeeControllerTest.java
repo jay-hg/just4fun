@@ -28,6 +28,21 @@ public class EmployeeControllerTest {
     }
 
     @Test
+    public void testValid() {
+        String result = null;
+        try {
+            result = mockMvc.perform(
+                    MockMvcRequestBuilders
+                            .post("/emp/testValid")
+            ).andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+    }
+
+    @Test
     public void testUploadExcel() {
         String result = null;
         try {
