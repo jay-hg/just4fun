@@ -1,14 +1,9 @@
 package com.acai.just4fun.controller;
 
-import com.acai.just4fun.annotation.Group;
 import com.acai.just4fun.dto.EmployeeDTO;
 import com.acai.just4fun.enums.EmployeeExcelEnum;
-import com.acai.just4fun.enums.GroupEnum;
-import com.acai.just4fun.handler.GroupHandler;
 import com.acai.just4fun.handler.Handler;
 import com.acai.just4fun.handler.HandlerFactory;
-import com.acai.just4fun.handler.NotBlankHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -22,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -65,33 +59,27 @@ public class EmployeeController {
                 for (Field field : fields) {
                     field.setAccessible(true);
                     Cell cell = row.getCell(EmployeeExcelEnum.getIndex(field.getName()));
-                    if (cell == null) {
-                        continue;
-                    }
-                    switch (cell.getCellTypeEnum()) {
-                        case NUMERIC:
-                            Double dNum = cell.getNumericCellValue();
-                            field.set(employeeDTO, dNum.intValue());
-                            break;
-                        case STRING:
-                            String str = cell.getStringCellValue();
-                            for (Annotation annoattion : field.getDeclaredAnnotations()) {
-                                Handler handler = HandlerFactory.createHandler(annoattion.annotationType());
-                                if (handler == null) {
-                                    continue;
-                                }
-                                String handleResult = handler.handle(field,str);
-                                if (handleResult != null) {
-                                    return handleResult;
-                                }
-                            }
 
-                            field.set(employeeDTO, str);
-                            break;
-                        default:
-                    }
+                    //校验
+                    String handleResult = validateCell(field, cell);
+                    if (handleResult != null) return handleResult;
 
+                    //填值
+                    if (cell != null) {
+                        switch (cell.getCellTypeEnum()) {
+                            case NUMERIC:
+                                Double dNum = cell.getNumericCellValue();
+                                field.set(employeeDTO, dNum.intValue());
+                                break;
+                            case STRING:
+                                String str = cell.getStringCellValue();
+                                field.set(employeeDTO, str);
+                                break;
+                            default:
+                        }
+                    }
                 }
+
                 empList.add(employeeDTO);
             }
         } catch (IOException e) {
@@ -104,5 +92,20 @@ public class EmployeeController {
             System.out.println(dto);
         }
         return "上传成功";
+    }
+
+    private String validateCell(Field field, Cell cell) throws IllegalAccessException {
+        for (Annotation annoattion : field.getDeclaredAnnotations()) {
+            Handler handler = HandlerFactory.createHandler(annoattion.annotationType());
+            if (handler == null) {
+                continue;
+            }
+            String handleResult = handler.handle(field, cell);
+            if (handleResult != null) {
+                return handleResult;
+            }
+        }
+
+        return null;
     }
 }
