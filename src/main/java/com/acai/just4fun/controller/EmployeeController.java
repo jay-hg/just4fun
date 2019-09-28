@@ -4,11 +4,14 @@ import com.acai.just4fun.dto.EmployeeDTO;
 import com.acai.just4fun.enums.EmployeeExcelEnum;
 import com.acai.just4fun.handler.Handler;
 import com.acai.just4fun.handler.HandlerFactory;
+import lombok.extern.java.Log;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +31,8 @@ import java.util.List;
 @RequestMapping("/emp")
 public class EmployeeController {
 
+    private static Logger logger = LoggerFactory.getLogger(EmployeeController.class);
+
     @PostMapping("/testValid")
     public String testValidated(@Validated EmployeeDTO employeeDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -43,49 +48,58 @@ public class EmployeeController {
         }
 
         InputStream is = null;
-        List<EmployeeDTO> empList = new ArrayList<>();
+        Workbook wb = null;
         try {
             is = file.getInputStream();
-            Workbook wb = new XSSFWorkbook(is);
-            Sheet sheet = wb.getSheetAt(0);
+            wb = new XSSFWorkbook(is);
+        } catch (IOException e) {
+            logger.error("uploadExcel io异常,e={}",e);
+        }
 
-            Class clazz = EmployeeDTO.class;
-            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
-                EmployeeDTO employeeDTO = new EmployeeDTO();
-                Row row = sheet.getRow(r);
+        List<EmployeeDTO> empList = new ArrayList<>();
+        Sheet sheet = wb.getSheetAt(0);
 
-                //利用反射构造dto对象
-                Field[] fields = clazz.getDeclaredFields();
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    Cell cell = row.getCell(EmployeeExcelEnum.getIndex(field.getName()));
+        Class clazz = EmployeeDTO.class;
+        for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+            EmployeeDTO employeeDTO = new EmployeeDTO();
+            Row row = sheet.getRow(r);
 
-                    //校验
-                    String handleResult = validateCell(field, cell);
-                    if (handleResult != null) return handleResult;
+            //利用反射构造dto对象
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                Cell cell = row.getCell(EmployeeExcelEnum.getIndex(field.getName()));
 
-                    //填值
-                    if (cell != null) {
-                        switch (cell.getCellTypeEnum()) {
-                            case NUMERIC:
-                                Double dNum = cell.getNumericCellValue();
+                //校验
+                String handleResult = validateCell(field, cell);
+                if (handleResult != null) return handleResult;
+
+                //填值
+                if (cell != null) {
+                    switch (cell.getCellTypeEnum()) {
+                        case NUMERIC:
+                            Double dNum = cell.getNumericCellValue();
+                            try {
                                 field.set(employeeDTO, dNum.intValue());
-                                break;
-                            case STRING:
-                                String str = cell.getStringCellValue();
+                            } catch (IllegalAccessException e) {
+                                logger.error("文件上传 填充double数值,e={}",e);
+                            }
+                            break;
+                        case STRING:
+                            String str = cell.getStringCellValue();
+                            try {
                                 field.set(employeeDTO, str);
-                                break;
-                            default:
-                        }
+                            } catch (IllegalAccessException e) {
+                                logger.error("文件上传 填充String字段,e={}",e);
+                            }
+                            break;
+                        default:
+                            //暂不支持其他类型
                     }
                 }
-
-                empList.add(employeeDTO);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+
+            empList.add(employeeDTO);
         }
 
         for (EmployeeDTO dto : empList) {
@@ -94,7 +108,7 @@ public class EmployeeController {
         return "上传成功";
     }
 
-    private String validateCell(Field field, Cell cell) throws IllegalAccessException {
+    private String validateCell(Field field, Cell cell) {
         for (Annotation annoattion : field.getDeclaredAnnotations()) {
             Handler handler = HandlerFactory.createHandler(annoattion.annotationType());
             if (handler == null) {
