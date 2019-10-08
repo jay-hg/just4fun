@@ -11,6 +11,7 @@ import java.util.List;
 
 public class ExtractService {
     private final static String URL_PRIFIX = "https://www.zhipin.com";
+
     public static List<JobInfo> extract(String responseBody) {
         JSONObject jsonObject = JSONObject.parseObject(responseBody);
         String html = jsonObject.getString("html");
@@ -20,7 +21,7 @@ public class ExtractService {
         Elements items = document.select("li");
         for (Element item : items) {
             JobInfo jobInfo = new JobInfo();
-            jobInfo.setDetailUrl(URL_PRIFIX+item.selectFirst("a").attr("href"));
+            jobInfo.setDetailUrl(URL_PRIFIX + item.selectFirst("a").attr("href"));
             jobInfo.setJobType(item.select("h4").text());
             jobInfo.setSalary(item.select(".salary").text());
             jobInfo.setCompanyName(item.select(".name").text());
