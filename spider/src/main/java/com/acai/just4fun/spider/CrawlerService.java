@@ -33,7 +33,11 @@ public class CrawlerService {
             response = httpClient.execute(httpPost);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-                System.out.println(EntityUtils.toString(response.getEntity()));
+                String responseBody = EntityUtils.toString(response.getEntity());
+                List<JobInfo> jobInfoList = ExtractService.extract(responseBody);
+                for (JobInfo jobInfo : jobInfoList) {
+                    System.out.println(jobInfo);
+                }
             } else {
                 System.out.println("请求失败");
             }
