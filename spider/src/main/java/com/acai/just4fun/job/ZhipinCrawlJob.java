@@ -1,6 +1,6 @@
-package com.acai.just4fun.spider.job;
+package com.acai.just4fun.job;
 
-import com.acai.just4fun.spider.CrawlerService;
+import com.acai.just4fun.CrawlerService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

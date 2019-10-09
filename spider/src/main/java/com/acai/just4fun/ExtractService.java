@@ -1,6 +1,6 @@
-package com.acai.just4fun.spider;
+package com.acai.just4fun;
 
-import com.acai.just4fun.spider.entity.JobInfo;
+import com.acai.just4fun.entity.JobInfo;
 import com.alibaba.fastjson.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

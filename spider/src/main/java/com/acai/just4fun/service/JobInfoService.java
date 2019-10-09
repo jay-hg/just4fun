@@ -1,6 +1,6 @@
-package com.acai.just4fun.spider.service;
+package com.acai.just4fun.service;
 
-import com.acai.just4fun.spider.entity.JobInfo;
+import com.acai.just4fun.entity.JobInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

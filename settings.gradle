@@ -1,3 +1,4 @@
 rootProject.name = 'just4fun'
 include 'spider'
+include 'excel-validate'
 

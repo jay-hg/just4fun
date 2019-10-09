@@ -1,6 +1,4 @@
 plugins {
-    id 'org.springframework.boot' version '2.1.8.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
 }
 
@@ -19,16 +17,5 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compile 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    // https://mvnrepository.com/artifact/org.apache.poi/poi
-    compile group: 'org.apache.poi', name: 'poi', version: '3.17'
-    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
-
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
 
 }

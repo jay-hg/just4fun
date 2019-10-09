@@ -1,8 +1,8 @@
-import com.acai.just4fun.spider.CrawlerService;
-import com.acai.just4fun.spider.ExtractService;
-import com.acai.just4fun.spider.SpiderApplication;
-import com.acai.just4fun.spider.entity.JobInfo;
-import com.acai.just4fun.spider.job.ZhipinCrawlJob;
+import com.acai.just4fun.CrawlerService;
+import com.acai.just4fun.ExtractService;
+import com.acai.just4fun.SpiderApplication;
+import com.acai.just4fun.entity.JobInfo;
+import com.acai.just4fun.job.ZhipinCrawlJob;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Test;

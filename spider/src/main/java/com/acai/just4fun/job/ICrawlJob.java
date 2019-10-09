@@ -1,4 +1,4 @@
-package com.acai.just4fun.spider.job;
+package com.acai.just4fun.job;
 
 public interface ICrawlJob extends Runnable {
 }

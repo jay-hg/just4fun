@@ -18,34 +18,22 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-
-    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore
     compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.10'
 
-    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
 
-    // https://mvnrepository.com/artifact/org.projectlombok/lombok
     compile group: 'org.projectlombok', name: 'lombok', version: '1.18.4'
-//    annotationProcessor 'org.projectlombok:lombok'
 
-    // https://mvnrepository.com/artifact/org.jsoup/jsoup
     compile group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
 
-    // https://mvnrepository.com/artifact/com.alibaba/fastjson
     compile group: 'com.alibaba', name: 'fastjson', version: '1.2.60'
 
-    // https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter
     compile group: 'com.baomidou', name: 'mybatis-plus-boot-starter', version: '3.1.2'
 
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot
     compile group: 'org.springframework.boot', name: 'spring-boot', version: '2.1.8.RELEASE'
 
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.8.RELEASE'
 
-    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13'
 
 }

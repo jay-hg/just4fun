@@ -1,8 +1,7 @@
-package com.acai.just4fun.spider;
+package com.acai.just4fun;
 
-import com.acai.just4fun.spider.entity.JobInfo;
-import com.acai.just4fun.spider.service.JobInfoService;
-import lombok.extern.java.Log;
+import com.acai.just4fun.service.JobInfoService;
+import com.acai.just4fun.entity.JobInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;

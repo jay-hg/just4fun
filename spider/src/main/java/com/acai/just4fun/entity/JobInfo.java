@@ -1,4 +1,4 @@
-package com.acai.just4fun.spider.entity;
+package com.acai.just4fun.entity;
 
 import lombok.Data;
 

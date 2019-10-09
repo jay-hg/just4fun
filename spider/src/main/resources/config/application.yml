@@ -10,7 +10,7 @@ mybatis-plus:
   # *Mapper.xml文件路径
   mapper-locations: classpath*:/mapping/*Mapper.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  type-aliases-package: com.acai.just4fun.spider.entity
+  type-aliases-package: com.acai.just4fun.entity
   global-config:
     db-config:
       # 全局默认主键类型
