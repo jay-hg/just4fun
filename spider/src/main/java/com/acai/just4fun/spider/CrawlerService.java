@@ -1,5 +1,9 @@
 package com.acai.just4fun.spider;
 
+import com.acai.just4fun.spider.entity.JobInfo;
+import com.acai.just4fun.spider.service.JobInfoService;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -8,11 +12,18 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
+@Service
 public class CrawlerService {
+
+    @Autowired
+    private JobInfoService jobInfoService;
 
     public void crawl(String urlString,List<NameValuePair> params) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -28,11 +39,14 @@ public class CrawlerService {
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 String responseBody = EntityUtils.toString(response.getEntity());
                 List<JobInfo> jobInfoList = ExtractService.extract(responseBody);
+
+                //数据入库
                 for (JobInfo jobInfo : jobInfoList) {
-                    System.out.println(jobInfo);
+                    jobInfoService.save(jobInfo);
+                    log.info("入库成功:{}",jobInfo);
                 }
             } else {
-                System.out.println("请求失败");
+                log.info("CrawlerService.crawl请求失败,request url:{},request param:{}",urlString,params);
             }
         } finally {
             if (response != null) {

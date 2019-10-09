@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acai.just4fun.spider.mapper.JobInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.acai.just4fun.spider.entity.JobInfo">
+        <id column="id" property="id" />
+        <result column="detail_url" property="detailUrl" />
+        <result column="job_type" property="jobType" />
+        <result column="salary" property="salary" />
+        <result column="company_name" property="companyName" />
+        <result column="location" property="location" />
+        <result column="experience" property="experience" />
+        <result column="education" property="education" />
+    </resultMap>
+
+</mapper>

@@ -1,0 +1,24 @@
+# DataSource Config
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/spider?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Hongkong&useSSL=false
+    username: root
+    password: 123456
+
+# MyBatis-Plus配置
+mybatis-plus:
+  # *Mapper.xml文件路径
+  mapper-locations: classpath*:/mapping/*Mapper.xml
+  # 实体扫描，多个package用逗号或者分号分隔
+  type-aliases-package: com.acai.just4fun.spider.entity
+  global-config:
+    db-config:
+      # 全局默认主键类型
+      id-type: uuid
+      # 表名前缀
+      table-prefix: spider_
+  configuration:
+    # DB列名到JavaBean属性名映射，符合规则无需使用@TableField注解指定数据库字段名（没开启这个，SQL需要写as： select user_id as userId）
+    map-underscore-to-camel-case: true
+    # 配置文件中的所有映射器已经配置的任何缓存
+    cache-enabled: true
