@@ -1,10 +1,18 @@
 import com.acai.just4fun.spider.CrawlerService;
 import com.acai.just4fun.spider.ExtractService;
 import com.acai.just4fun.spider.JobInfo;
+import com.acai.just4fun.spider.job.ZhipinCrawlJob;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class TestSpider {
 
@@ -12,8 +20,12 @@ public class TestSpider {
     public void testCrawl() {
         String urlStr = "https://www.zhipin.com/mobile/jobs.json";
         CrawlerService cs = new CrawlerService();
+        List<NameValuePair> params = new LinkedList<>();
+        params.add(new BasicNameValuePair("page", "1"));
+        params.add(new BasicNameValuePair("city", "101020100"));
+        params.add(new BasicNameValuePair("query", "java"));
         try {
-            cs.crawl(urlStr);
+            cs.crawl(urlStr,params);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("爬取失败,io异常");
@@ -27,5 +39,29 @@ public class TestSpider {
         for (JobInfo jobInfo : jobInfoList) {
             System.out.println(jobInfo);
         }
+    }
+
+    private ThreadPoolExecutor crawlExecutor = new ThreadPoolExecutor(4, 4, 2000, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>());
+
+    @Test
+    public void testZhipinCrawlJob() {
+        for (int i = 1; i < 10; i++) {
+            ZhipinCrawlJob job = new ZhipinCrawlJob();
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("page", i+""));
+            params.add(new BasicNameValuePair("city", "101020100"));
+            params.add(new BasicNameValuePair("query", "java"));
+            job.setParams(params);
+
+            crawlExecutor.execute(job);
+
+            try {
+                Thread.sleep(12000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }
