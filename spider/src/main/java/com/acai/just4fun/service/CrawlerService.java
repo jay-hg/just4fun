@@ -1,7 +1,7 @@
-package com.acai.just4fun;
+package com.acai.just4fun.service;
 
-import com.acai.just4fun.service.JobInfoService;
 import com.acai.just4fun.entity.JobInfo;
+import com.acai.just4fun.job.ICrawlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -24,7 +24,7 @@ public class CrawlerService {
     @Autowired
     private JobInfoService jobInfoService;
 
-    public void crawl(String urlString,List<NameValuePair> params) throws IOException {
+    public void crawl(String urlString, List<NameValuePair> params, ICrawlJob crawlJob) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(urlString);
         httpPost.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:50.0) Gecko/20100101 Firefox/50.0");
@@ -37,7 +37,7 @@ public class CrawlerService {
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 String responseBody = EntityUtils.toString(response.getEntity());
-                List<JobInfo> jobInfoList = ExtractService.extract(responseBody);
+                List<JobInfo> jobInfoList = crawlJob.extractJobInfo(responseBody);
 
                 //数据入库
                 for (JobInfo jobInfo : jobInfoList) {
