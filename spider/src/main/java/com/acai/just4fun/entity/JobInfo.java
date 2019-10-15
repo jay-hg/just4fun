@@ -1,5 +1,6 @@
 package com.acai.just4fun.entity;
 
+import com.acai.just4fun.enums.JobSourceEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -31,4 +32,6 @@ public class JobInfo implements Serializable {
     private String experience;
 
     private String education;
+
+    private JobSourceEnum source;
 }

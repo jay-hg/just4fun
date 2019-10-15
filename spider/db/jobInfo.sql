@@ -22,3 +22,6 @@ create table spider_job_info
    primary key (id)
 );
 
+-- 2019.10.15 增加数据来源字段
+ALTER TABLE `spider`.`spider_job_info`
+ADD COLUMN `source` enum('OTHER','BOSS','ZHILIAN','LAGOU','JOB51') NOT NULL DEFAULT 'OTHER' AFTER `education`;

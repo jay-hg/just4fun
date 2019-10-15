@@ -1,6 +1,7 @@
 package com.acai.just4fun.job;
 
 import com.acai.just4fun.entity.JobInfo;
+import com.acai.just4fun.enums.JobSourceEnum;
 import com.acai.just4fun.service.CrawlerService;
 import lombok.Getter;
 import lombok.Setter;
@@ -56,7 +57,8 @@ public class ZhilianCrawlJob implements ICrawlJob {
             jobInfo.setSalary(element.select(".job-sal").text());
             Element jobItem = element.select(".jobmenu").first();
             jobInfo.setCompanyName(jobItem.attr("data-companname"));
-            jobInfo.setJobType(jobItem.attr("data-jobname"));
+            jobInfo.setJobType(jobItem.attr("data-jobname").substring(0,32));
+            jobInfo.setSource(JobSourceEnum.ZHILIAN);
 
             jobInfos.add(jobInfo);
         }

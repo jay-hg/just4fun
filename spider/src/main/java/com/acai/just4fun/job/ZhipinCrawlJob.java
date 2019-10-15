@@ -1,6 +1,7 @@
 package com.acai.just4fun.job;
 
 import com.acai.just4fun.entity.JobInfo;
+import com.acai.just4fun.enums.JobSourceEnum;
 import com.acai.just4fun.service.CrawlerService;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
@@ -70,6 +71,7 @@ public class ZhipinCrawlJob implements ICrawlJob {
                 jobInfo.setExperience(experience);
                 jobInfo.setEducation(education);
             }
+            jobInfo.setSource(JobSourceEnum.BOSS);
             jobInfoList.add(jobInfo);
         }
         return jobInfoList;
