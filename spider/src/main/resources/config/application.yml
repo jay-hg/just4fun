@@ -4,6 +4,12 @@ spring:
     url: jdbc:mysql://localhost:3306/spider?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Hongkong&useSSL=false
     username: root
     password: 123456
+  redis:
+    host: 172.18.2.241
+    port: 6379
+    password:
+    timeout: 5000ms
+    database: 9
 
 # MyBatis-Plus配置
 mybatis-plus:

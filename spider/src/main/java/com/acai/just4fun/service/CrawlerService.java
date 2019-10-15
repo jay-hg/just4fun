@@ -12,14 +12,22 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
 public class CrawlerService {
+
+    public static final String JOB_INFO_URL_KEY = "jobInfoUrl";
+    @Autowired
+    RedisTemplate redisTemplate;
 
     @Autowired
     private JobInfoService jobInfoService;
@@ -41,7 +49,13 @@ public class CrawlerService {
 
                 //数据入库
                 for (JobInfo jobInfo : jobInfoList) {
+                    //校验数据是否重复
+                    if (redisTemplate.opsForSet().isMember(JOB_INFO_URL_KEY,jobInfo.getDetailUrl())) {
+                        continue;
+                    }
+
                     jobInfoService.save(jobInfo);
+                    redisTemplate.opsForSet().add(JOB_INFO_URL_KEY, jobInfo.getDetailUrl());
                     log.info("入库成功:{}",jobInfo);
                 }
             } else {
