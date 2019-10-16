@@ -34,15 +34,13 @@ public class TestSpider {
 
     @Test
     public void testZhipinCrawlJob() {
-        for (int i = 1; i < 3; i++) {
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("page", i+""));
-            params.add(new BasicNameValuePair("city", "101020100"));
-            params.add(new BasicNameValuePair("query", "java"));
-            zhipinCrawlJob.setParams(params);
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("page", "1"));
+        params.add(new BasicNameValuePair("city", "101020100"));
+        params.add(new BasicNameValuePair("query", "java"));
+        zhipinCrawlJob.setParams(params);
 
-            crawlExecutor.execute(zhipinCrawlJob);
-        }
+        crawlExecutor.execute(zhipinCrawlJob);
 
         crawlExecutor.shutdown();
         try {
