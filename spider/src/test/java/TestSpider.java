@@ -2,6 +2,8 @@ import com.acai.just4fun.SpiderApplication;
 import com.acai.just4fun.job.ZhilianCrawlJob;
 import com.acai.just4fun.job.ZhipinCrawlJob;
 import com.acai.just4fun.service.CrawlerService;
+import com.acai.just4fun.service.QueryService;
+import com.acai.just4fun.vo.AverageSalaryVO;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Test;
@@ -11,10 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SpringBootTest(classes = SpiderApplication.class)
 @RunWith(SpringRunner.class)
@@ -69,6 +74,31 @@ public class TestSpider {
             crawlExecutor.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Autowired
+    QueryService queryService;
+
+    @Test
+    public void testQueryAverageSalary() {
+        AverageSalaryVO vo = queryService.queryAverageSalary();
+        System.out.println(vo);
+    }
+
+    Pattern pattern = Pattern.compile("(\\d+(\\.\\d+)?)(k|千|万|w)?.(\\d+(\\.\\d+)?)(k|千|万|w)?");
+    List<String> matchContents = Arrays.asList("2-3k","9千-1.8万/月");
+
+    @Test
+    public void testMatche() {
+        for (String matchContent : matchContents) {
+            Matcher matcher = pattern.matcher(matchContent);
+            if (matcher.find()) {
+                for (int i = 0; i <= matcher.groupCount(); i++) {
+                    System.out.printf("group(%d)="+matcher.group(i),i);
+                    System.out.println();
+                }
+            }
         }
     }
 }

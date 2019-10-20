@@ -1,5 +1,6 @@
 package com.acai.just4fun.entity;
 
+import com.acai.just4fun.enums.DataStatus;
 import com.acai.just4fun.enums.JobSourceEnum;
 import lombok.Data;
 
@@ -34,4 +35,10 @@ public class JobInfo implements Serializable {
     private String education;
 
     private JobSourceEnum source;
+
+    private Float minSalary;
+
+    private Float maxSalary;
+
+    private DataStatus dataStatus;
 }

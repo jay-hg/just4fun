@@ -1,7 +1,11 @@
 package com.acai.just4fun;
 
+import com.acai.just4fun.entity.JobInfo;
+import com.acai.just4fun.enums.DataStatus;
 import com.acai.just4fun.job.ZhipinCrawlJob;
 import com.acai.just4fun.service.CrawlerService;
+import com.acai.just4fun.service.JobInfoService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -39,6 +43,9 @@ public class SpiderApplication {
     @Autowired
     ZhipinCrawlJob zhipinCrawlJob;
 
+    @Autowired
+    JobInfoService jobInfoService;
+
     @Scheduled(fixedDelay = 1000*60*60)
     public void bossJobInfoCrawl() {
         log.info("定时任务，开始boss jobInfo 爬取");
@@ -55,6 +62,32 @@ public class SpiderApplication {
             crawlExecutor.execute(zhipinCrawlJob);
 
             log.info("boss第{}次爬取任务已提交,线程池排队数量:{}",i,crawlExecutor.getQueue().size());
+        }
+    }
+
+    @Scheduled(fixedDelay = 1000*10)
+    public void handleRawJobInfoData() {
+        log.info("开始处理原始的jobInfo数据");
+        if (crawlExecutor.getActiveCount() > 0) {
+            log.info("爬虫线程还在执行，暂不处理...");
+            return;
+        }
+
+        //获取待处理列表
+        List<JobInfo> jobInfoList = jobInfoService.list(new QueryWrapper<JobInfo>().lambda()
+            .eq(JobInfo::getDataStatus, DataStatus.NEED_HANDLE)
+        );
+
+        for (JobInfo jobInfo : jobInfoList) {
+            boolean isValidateSalary = SalaryUtil.resolveSalary(jobInfo);
+            if (isValidateSalary) {
+                jobInfo.setDataStatus(DataStatus.USEABLE);
+            } else {
+                jobInfo.setDataStatus(DataStatus.INVALID);
+            }
+
+            jobInfoService.updateById(jobInfo);
+            log.info("更新完成:{}",jobInfo);
         }
     }
 }

@@ -13,6 +13,9 @@
         <result column="experience" property="experience" />
         <result column="education" property="education" />
         <result column="source" property="source" />
+        <result column="min_salary" property="minSalary" />
+        <result column="max_salary" property="maxSalary" />
+        <result column="data_status" property="dataStatus" />
     </resultMap>
 
 </mapper>
