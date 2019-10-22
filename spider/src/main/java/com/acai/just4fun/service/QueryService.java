@@ -1,5 +1,6 @@
 package com.acai.just4fun.service;
 
+import com.acai.just4fun.dto.QueryAverageSalaryDTO;
 import com.acai.just4fun.entity.JobInfo;
 import com.acai.just4fun.enums.DataStatus;
 import com.acai.just4fun.vo.AverageSalaryVO;
@@ -14,9 +15,11 @@ public class QueryService {
     @Autowired
     JobInfoService jobInfoService;
 
-    public AverageSalaryVO queryAverageSalary() {
+    public AverageSalaryVO queryAverageSalary(QueryAverageSalaryDTO queryDTO) {
         List<JobInfo> jobInfoList = jobInfoService.list(new QueryWrapper<JobInfo>().lambda()
                 .eq(JobInfo::getDataStatus, DataStatus.USEABLE)
+                .eq(JobInfo::getExperience, queryDTO.getExperience())
+                .eq(JobInfo::getLocation, queryDTO.getLocation())
         );
 
         AverageSalaryVO vo = new AverageSalaryVO();

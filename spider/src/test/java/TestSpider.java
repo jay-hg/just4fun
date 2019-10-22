@@ -1,4 +1,5 @@
 import com.acai.just4fun.SpiderApplication;
+import com.acai.just4fun.dto.QueryAverageSalaryDTO;
 import com.acai.just4fun.job.ZhilianCrawlJob;
 import com.acai.just4fun.job.ZhipinCrawlJob;
 import com.acai.just4fun.service.CrawlerService;
@@ -82,7 +83,10 @@ public class TestSpider {
 
     @Test
     public void testQueryAverageSalary() {
-        AverageSalaryVO vo = queryService.queryAverageSalary();
+        QueryAverageSalaryDTO queryDTO = new QueryAverageSalaryDTO();
+        queryDTO.setExperience("1-3年");
+        queryDTO.setLocation("上海");
+        AverageSalaryVO vo = queryService.queryAverageSalary(queryDTO);
         System.out.println(vo);
     }
 
