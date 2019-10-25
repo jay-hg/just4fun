@@ -1,6 +1,7 @@
 package com.acai.just4fun;
 
 import com.acai.just4fun.entity.JobInfo;
+import com.acai.just4fun.enums.BossCityCodeEnum;
 import com.acai.just4fun.enums.DataStatus;
 import com.acai.just4fun.job.ZhipinCrawlJob;
 import com.acai.just4fun.service.CrawlerService;
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SpiderApplication {
 
-    public static final int BATCH_JOB_COUNT = 200;
+    public static final int BATCH_JOB_COUNT = 50;
 
     public static void main(String[] args) {
         SpringApplication.run(SpiderApplication.class, args);
@@ -50,18 +51,20 @@ public class SpiderApplication {
     public void bossJobInfoCrawl() {
         log.info("定时任务，开始boss jobInfo 爬取");
 
-        for (int i = 1; i < BATCH_JOB_COUNT; i++) {
-            ZhipinCrawlJob zhipinCrawlJob = new ZhipinCrawlJob();
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("page", i+""));
-            params.add(new BasicNameValuePair("city", "101020100"));
-            params.add(new BasicNameValuePair("query", "java"));
-            zhipinCrawlJob.setParams(params);
-            zhipinCrawlJob.setCrawlerService(cs);
+        for (BossCityCodeEnum bossCityCodeEnum : BossCityCodeEnum.values()) {
+            for (int i = 1; i < BATCH_JOB_COUNT; i++) {
+                ZhipinCrawlJob zhipinCrawlJob = new ZhipinCrawlJob();
+                List<NameValuePair> params = new ArrayList<>();
+                params.add(new BasicNameValuePair("page", i + ""));
+                params.add(new BasicNameValuePair("city", bossCityCodeEnum.getCode()));
+                params.add(new BasicNameValuePair("query", "java"));
+                zhipinCrawlJob.setParams(params);
+                zhipinCrawlJob.setCrawlerService(cs);
 
-            crawlExecutor.execute(zhipinCrawlJob);
+                crawlExecutor.execute(zhipinCrawlJob);
 
-            log.info("boss第{}次爬取任务已提交,线程池排队数量:{}",i,crawlExecutor.getQueue().size());
+                log.info("boss第{}次爬取任务已提交,线程池排队数量:{}", i, crawlExecutor.getQueue().size());
+            }
         }
     }
 
