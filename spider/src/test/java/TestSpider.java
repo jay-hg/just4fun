@@ -85,7 +85,7 @@ public class TestSpider {
     public void testQueryAverageSalary() {
         QueryAverageSalaryDTO queryDTO = new QueryAverageSalaryDTO();
         queryDTO.setExperience("1-3年");
-        queryDTO.setLocation("福州");
+        queryDTO.setLocation("上海");
         AverageSalaryVO vo = queryService.queryAverageSalary(queryDTO);
         System.out.println(vo);
     }
