@@ -58,7 +58,7 @@ public class ZhipinCrawlJob implements ICrawlJob {
         for (Element item : items) {
             JobInfo jobInfo = new JobInfo();
             jobInfo.setDetailUrl(URL_PRIFIX + item.selectFirst("a").attr("href"));
-            jobInfo.setJobType(item.select("h4").text());
+            jobInfo.setJobType(item.select("h4").text().substring(0,32));
             jobInfo.setSalary(item.select(".salary").text());
             jobInfo.setCompanyName(item.select(".name").text());
             Elements msgs = item.select(".msg em");
