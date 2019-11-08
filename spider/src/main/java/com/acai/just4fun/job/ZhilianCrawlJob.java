@@ -57,7 +57,10 @@ public class ZhilianCrawlJob implements ICrawlJob {
             jobInfo.setSalary(element.select(".job-sal").text());
             Element jobItem = element.select(".jobmenu").first();
             jobInfo.setCompanyName(jobItem.attr("data-companname"));
-            jobInfo.setJobType(jobItem.attr("data-jobname").substring(0,32));
+            jobInfo.setJobType(jobItem.attr("data-jobname"));
+            if (jobInfo.getJobType().length() > 32) {
+                jobInfo.setJobType(jobInfo.getJobType().substring(0,32));
+            }
             jobInfo.setSource(JobSourceEnum.ZHILIAN);
 
             jobInfos.add(jobInfo);
