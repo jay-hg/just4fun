@@ -79,5 +79,20 @@ SELECT *,TIMESTAMPDIFF(YEAR,student.Sage,CURRENT_DATE()) as age FROM student
 SELECT * FROM student WHERE YEARWEEK(student.Sage) = YEARWEEK(CURRENT_DATE())
 ```
 
+12. 检索" 01 "课程分数小于 60，按分数降序排列的学生信息
+```mysql
+SELECT student.* FROM sc 
+inner join student on sc.SId=student.SId 
+WHERE CId=01 and score<60
+ORDER BY score desc
+```
+
+13. 按各科成绩进行排序，并显示排名， Score 重复时保留名次空缺
+```mysql
+SELECT sc.SId,sc.score,@curRank:=@curRank+1 as rank 
+FROM sc,(SELECT @curRank:=0) as t
+ORDER BY score desc
+```
+
 
 
