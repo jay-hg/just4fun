@@ -94,5 +94,15 @@ FROM sc,(SELECT @curRank:=0) as t
 ORDER BY score desc
 ```
 
+14. 查询各科成绩前三名的记录
+```mysql
+SELECT * FROM sc
+WHERE (
+		SELECT count(*) FROM sc as sc1 
+		WHERE sc1.score > sc.score AND sc.CId=sc1.CId
+	) < 3
+ORDER BY CId asc,score desc
+```
+
 
 
