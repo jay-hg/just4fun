@@ -2,9 +2,6 @@ package com.acai.just4fun.controller;
 
 import com.acai.just4fun.dto.EmployeeDTO;
 import com.acai.just4fun.enums.EmployeeExcelEnum;
-import com.acai.just4fun.handler.Handler;
-import com.acai.just4fun.handler.HandlerFactory;
-import lombok.extern.java.Log;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -20,12 +17,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/emp")
@@ -43,8 +45,23 @@ public class EmployeeController {
 
     @PostMapping("/uploadExcel")
     public String uploadExcel(@RequestParam("file") MultipartFile file) {
+        List<EmployeeDTO> empList = null;
+
+        try {
+            empList = generateEmpList(file);
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        }
+
+        for (EmployeeDTO dto : empList) {
+            System.out.println(dto);
+        }
+        return "上传成功";
+    }
+
+    private List<EmployeeDTO> generateEmpList(MultipartFile file) {
         if (file.isEmpty()) {
-            return "文件为空";
+            throw new IllegalArgumentException("文件为空");
         }
 
         InputStream is = null;
@@ -53,12 +70,11 @@ public class EmployeeController {
             is = file.getInputStream();
             wb = new XSSFWorkbook(is);
         } catch (IOException e) {
-            logger.error("uploadExcel io异常,e={}",e);
+            logger.error("uploadExcel io异常,e={}", e);
         }
-
-        List<EmployeeDTO> empList = new ArrayList<>();
         Sheet sheet = wb.getSheetAt(0);
 
+        List<EmployeeDTO> empList = new ArrayList<>(sheet.getLastRowNum());
         Class clazz = EmployeeDTO.class;
         for (int r = 1; r <= sheet.getLastRowNum(); r++) {
             EmployeeDTO employeeDTO = new EmployeeDTO();
@@ -70,10 +86,6 @@ public class EmployeeController {
                 field.setAccessible(true);
                 Cell cell = row.getCell(EmployeeExcelEnum.getIndex(field.getName()));
 
-                //校验
-                String handleResult = validateCell(field, cell);
-                if (handleResult != null) return handleResult;
-
                 //填值
                 if (cell != null) {
                     switch (cell.getCellTypeEnum()) {
@@ -82,7 +94,7 @@ public class EmployeeController {
                             try {
                                 field.set(employeeDTO, dNum.intValue());
                             } catch (IllegalAccessException e) {
-                                logger.error("文件上传 填充double数值,e={}",e);
+                                logger.error("文件上传 填充double数值,e={}", e);
                             }
                             break;
                         case STRING:
@@ -90,7 +102,7 @@ public class EmployeeController {
                             try {
                                 field.set(employeeDTO, str);
                             } catch (IllegalAccessException e) {
-                                logger.error("文件上传 填充String字段,e={}",e);
+                                logger.error("文件上传 填充String字段,e={}", e);
                             }
                             break;
                         default:
@@ -102,24 +114,24 @@ public class EmployeeController {
             empList.add(employeeDTO);
         }
 
-        for (EmployeeDTO dto : empList) {
-            System.out.println(dto);
+        //校验
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        if (empList != null && empList.size() > 0) {
+            empList.forEach(employeeDTO -> {
+                Set<ConstraintViolation<EmployeeDTO>> constraintViolations = validator.validate(employeeDTO);
+                if (constraintViolations.size() > 0) {
+                    ConstraintViolation<EmployeeDTO> constraintViolation = constraintViolations.iterator().next();
+                    throw new IllegalArgumentException(constraintViolation.getMessage());
+                }
+            });
         }
-        return "上传成功";
+        /*Set<ConstraintViolation<List<EmployeeDTO>>> constraintViolations = validator.validate(empList);
+        if (constraintViolations.size() > 0) {
+            ConstraintViolation<List<EmployeeDTO>> constraintViolation = constraintViolations.iterator().next();
+            throw new IllegalArgumentException(constraintViolation.getMessage());
+        }*/
+        return empList;
     }
 
-    private String validateCell(Field field, Cell cell) {
-        for (Annotation annoattion : field.getDeclaredAnnotations()) {
-            Handler handler = HandlerFactory.createHandler(annoattion.annotationType());
-            if (handler == null) {
-                continue;
-            }
-            String handleResult = handler.handle(field, cell);
-            if (handleResult != null) {
-                return handleResult;
-            }
-        }
-
-        return null;
-    }
 }
