@@ -1,7 +1,10 @@
 package com.acai.just4fun.controller;
 
 import com.acai.just4fun.dto.EmployeeDTO;
+import com.acai.just4fun.dto.HeroPropertiesDTO;
 import com.acai.just4fun.enums.EmployeeExcelEnum;
+import com.acai.just4fun.enums.HeroPropertiesExcelEnum;
+import com.acai.just4fun.enums.HeroTypeEnum;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -17,13 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import javax.validation.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +47,13 @@ public class EmployeeController {
         List<EmployeeDTO> empList = null;
 
         try {
-            empList = generateEmpList(file);
+            empList = generateDtoList(file, EmployeeDTO.class);
         } catch (IllegalArgumentException e) {
             return e.getMessage();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
         }
 
         for (EmployeeDTO dto : empList) {
@@ -59,7 +62,27 @@ public class EmployeeController {
         return "上传成功";
     }
 
-    private List<EmployeeDTO> generateEmpList(MultipartFile file) {
+    @PostMapping("/uploadExcel2")
+    public String uploadExcel2(@RequestParam("file") MultipartFile file) {
+        List<HeroPropertiesDTO> heroPropertiesDTOList = null;
+
+        try {
+            heroPropertiesDTOList = generateDtoList(file, HeroPropertiesDTO.class);
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+
+        for (HeroPropertiesDTO dto : heroPropertiesDTOList) {
+            System.out.println(dto);
+        }
+        return "上传成功";
+    }
+
+    private <T> List<T> generateDtoList(MultipartFile file, Class clazz) throws IllegalAccessException, InstantiationException {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("文件为空");
         }
@@ -74,17 +97,22 @@ public class EmployeeController {
         }
         Sheet sheet = wb.getSheetAt(0);
 
-        List<EmployeeDTO> empList = new ArrayList<>(sheet.getLastRowNum());
-        Class clazz = EmployeeDTO.class;
+        List<T> dtoList = new ArrayList<>(sheet.getLastRowNum());
         for (int r = 1; r <= sheet.getLastRowNum(); r++) {
-            EmployeeDTO employeeDTO = new EmployeeDTO();
+            T dto = (T) clazz.newInstance();
             Row row = sheet.getRow(r);
 
             //利用反射构造dto对象
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 field.setAccessible(true);
-                Cell cell = row.getCell(EmployeeExcelEnum.getIndex(field.getName()));
+                int idx = 0;
+                if (clazz == EmployeeDTO.class) {
+                    idx = EmployeeExcelEnum.getIndex(field.getName());
+                } else {
+                    idx = HeroPropertiesExcelEnum.getIndex(field.getName());
+                }
+                Cell cell = row.getCell(idx);
 
                 //填值
                 if (cell != null) {
@@ -92,7 +120,7 @@ public class EmployeeController {
                         case NUMERIC:
                             Double dNum = cell.getNumericCellValue();
                             try {
-                                field.set(employeeDTO, dNum.intValue());
+                                field.set(dto, dNum.intValue());
                             } catch (IllegalAccessException e) {
                                 logger.error("文件上传 填充double数值,e={}", e);
                             }
@@ -100,7 +128,11 @@ public class EmployeeController {
                         case STRING:
                             String str = cell.getStringCellValue();
                             try {
-                                field.set(employeeDTO, str);
+                                if (field.getType().equals(HeroTypeEnum.class)) {
+                                    field.set(dto, HeroTypeEnum.valueOf(str));
+                                } else {
+                                    field.set(dto, str);
+                                }
                             } catch (IllegalAccessException e) {
                                 logger.error("文件上传 填充String字段,e={}", e);
                             }
@@ -109,29 +141,31 @@ public class EmployeeController {
                             //暂不支持其他类型
                     }
                 }
+
             }
 
-            empList.add(employeeDTO);
+            dtoList.add(dto);
         }
 
         //校验
+        if (clazz == EmployeeDTO.class) {
+            validParam(dtoList);
+        }
+        return dtoList;
+    }
+
+    private <T> void validParam(List<T> dtoList) {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
-        if (empList != null && empList.size() > 0) {
-            empList.forEach(employeeDTO -> {
-                Set<ConstraintViolation<EmployeeDTO>> constraintViolations = validator.validate(employeeDTO);
+        if (dtoList != null && dtoList.size() > 0) {
+            dtoList.forEach(employeeDTO -> {
+                Set<ConstraintViolation<T>> constraintViolations = validator.validate(employeeDTO);
                 if (constraintViolations.size() > 0) {
-                    ConstraintViolation<EmployeeDTO> constraintViolation = constraintViolations.iterator().next();
+                    ConstraintViolation<T> constraintViolation = constraintViolations.iterator().next();
                     throw new IllegalArgumentException(constraintViolation.getMessage());
                 }
             });
         }
-        /*Set<ConstraintViolation<List<EmployeeDTO>>> constraintViolations = validator.validate(empList);
-        if (constraintViolations.size() > 0) {
-            ConstraintViolation<List<EmployeeDTO>> constraintViolation = constraintViolations.iterator().next();
-            throw new IllegalArgumentException(constraintViolation.getMessage());
-        }*/
-        return empList;
     }
 
 }

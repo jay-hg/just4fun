@@ -17,7 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class EmployeeControllerTest {
+public class UploadExcel {
     @Autowired
     private WebApplicationContext wac;
 
