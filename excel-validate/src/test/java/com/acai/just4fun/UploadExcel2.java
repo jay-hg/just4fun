@@ -49,4 +49,26 @@ public class UploadExcel2 {
         System.out.println(result);
         Assert.assertEquals("上传成功",result);
     }
+
+    /**
+     * group传空字符串
+     */
+    @Test
+    public void testUploadExcel2() {
+        String result = null;
+        try {
+            ClassPathResource resource = new ClassPathResource("files/英雄属性表(属性值超限).xlsx");
+            MockMultipartFile file = new MockMultipartFile("file", resource.getInputStream());
+            result = mockMvc.perform(
+                    MockMvcRequestBuilders
+                            .multipart("/emp/uploadExcel2")
+                            .file(file)
+            ).andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        Assert.assertEquals("属性值不能超过100",result);
+    }
 }

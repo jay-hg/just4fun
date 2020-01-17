@@ -1,23 +1,25 @@
-package com.acai.just4fun.enums;
+package com.acai.just4fun.enums.excel;
 
 /**
- * heroPropertiesDTO对应的excel每一列与heroPropertiesDTO字段的对应关系
+ * employee对应的excel每一列与EmployeeDTO字段的对应关系
  */
-public enum HeroPropertiesExcelEnum {
+public enum EmployeeExcelEnum {
     NAME(0,"name"),
-    HERO_TYPE(1,"heroType"),
-    VALUE(2,"value");
+    AGE(1,"age"),
+    ID_CARD_NO(2,"idCardNo"),
+    GROUP(3,"group"),
+    ROLE(4,"role");
 
     private Integer excelCellIndex;
     private String dtoFieldName;
 
-    HeroPropertiesExcelEnum(Integer excelCellIndex, String dtoFieldName) {
+    EmployeeExcelEnum(Integer excelCellIndex, String dtoFieldName) {
         this.excelCellIndex = excelCellIndex;
         this.dtoFieldName = dtoFieldName;
     }
 
     public static Integer getIndex(String dtoFieldName) {
-        for (HeroPropertiesExcelEnum e : HeroPropertiesExcelEnum.values()) {
+        for (EmployeeExcelEnum e : EmployeeExcelEnum.values()) {
             if (e.dtoFieldName.equals(dtoFieldName)) {
                 return e.excelCellIndex;
             }

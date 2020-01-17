@@ -7,7 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 
 @Data
-public class EmployeeDTO {
+public class EmployeeDTO implements BasicExcelDTO{
     @NotBlank(message = "[name]不能为空")
     private String name;
 

@@ -1,10 +1,12 @@
 package com.acai.just4fun.controller;
 
+import com.acai.just4fun.dto.BasicExcelDTO;
 import com.acai.just4fun.dto.EmployeeDTO;
 import com.acai.just4fun.dto.HeroPropertiesDTO;
-import com.acai.just4fun.enums.EmployeeExcelEnum;
-import com.acai.just4fun.enums.HeroPropertiesExcelEnum;
+import com.acai.just4fun.enums.excel.EmployeeExcelEnum;
+import com.acai.just4fun.enums.excel.HeroPropertiesExcelEnum;
 import com.acai.just4fun.enums.HeroTypeEnum;
+import com.acai.just4fun.type.TypeHandlerRegistry;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -82,7 +84,12 @@ public class EmployeeController {
         return "上传成功";
     }
 
+    private final static TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
+
     private <T> List<T> generateDtoList(MultipartFile file, Class clazz) throws IllegalAccessException, InstantiationException {
+        if (!BasicExcelDTO.class.isAssignableFrom(clazz)) {
+            throw new IllegalStateException("dto应实现BasicExcelDTO");
+        }
         if (file.isEmpty()) {
             throw new IllegalArgumentException("文件为空");
         }
@@ -107,6 +114,7 @@ public class EmployeeController {
             for (Field field : fields) {
                 field.setAccessible(true);
                 int idx = 0;
+
                 if (clazz == EmployeeDTO.class) {
                     idx = EmployeeExcelEnum.getIndex(field.getName());
                 } else {
@@ -116,30 +124,8 @@ public class EmployeeController {
 
                 //填值
                 if (cell != null) {
-                    switch (cell.getCellTypeEnum()) {
-                        case NUMERIC:
-                            Double dNum = cell.getNumericCellValue();
-                            try {
-                                field.set(dto, dNum.intValue());
-                            } catch (IllegalAccessException e) {
-                                logger.error("文件上传 填充double数值,e={}", e);
-                            }
-                            break;
-                        case STRING:
-                            String str = cell.getStringCellValue();
-                            try {
-                                if (field.getType().equals(HeroTypeEnum.class)) {
-                                    field.set(dto, HeroTypeEnum.valueOf(str));
-                                } else {
-                                    field.set(dto, str);
-                                }
-                            } catch (IllegalAccessException e) {
-                                logger.error("文件上传 填充String字段,e={}", e);
-                            }
-                            break;
-                        default:
-                            //暂不支持其他类型
-                    }
+                    Object value = typeHandlerRegistry.getMappingTypeHandler(field.getType()).getResult(row, idx);
+                    field.set(dto,value);
                 }
 
             }
@@ -148,9 +134,7 @@ public class EmployeeController {
         }
 
         //校验
-        if (clazz == EmployeeDTO.class) {
-            validParam(dtoList);
-        }
+        validParam(dtoList);
         return dtoList;
     }
 
@@ -158,8 +142,8 @@ public class EmployeeController {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         if (dtoList != null && dtoList.size() > 0) {
-            dtoList.forEach(employeeDTO -> {
-                Set<ConstraintViolation<T>> constraintViolations = validator.validate(employeeDTO);
+            dtoList.forEach(dto -> {
+                Set<ConstraintViolation<T>> constraintViolations = validator.validate(dto);
                 if (constraintViolations.size() > 0) {
                     ConstraintViolation<T> constraintViolation = constraintViolations.iterator().next();
                     throw new IllegalArgumentException(constraintViolation.getMessage());
