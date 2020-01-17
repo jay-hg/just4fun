@@ -18,6 +18,16 @@ public final class TypeHandlerRegistry {
     }
 
     public TypeHandler<?> getTypeHandler(Type javaType) {
-        return allTypeHandlersMap.get(javaType);
+        TypeHandler<?> typeHandler = allTypeHandlersMap.get(javaType);
+        if (typeHandler == null && javaType instanceof Class) {
+
+            Class<?> clazz = (Class<?>) javaType;
+            if (Enum.class.isAssignableFrom(clazz)) {
+                Class<?> enumClass = clazz.isAnonymousClass() ? clazz.getSuperclass() : clazz;
+                allTypeHandlersMap.put(enumClass, new EnumTypeHandler(enumClass));
+                return allTypeHandlersMap.get(enumClass);
+            }
+        }
+        return typeHandler;
     }
 }

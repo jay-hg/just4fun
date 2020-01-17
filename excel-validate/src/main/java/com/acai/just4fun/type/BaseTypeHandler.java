@@ -1,6 +1,5 @@
 package com.acai.just4fun.type;
 
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
 public abstract class BaseTypeHandler<T> implements TypeHandler<T> {
@@ -16,5 +15,5 @@ public abstract class BaseTypeHandler<T> implements TypeHandler<T> {
     }
 
 
-    public abstract T getNullableResult(Row Row, int columnIndex);
+    public abstract T getNullableResult(Row row, int columnIndex);
 }
