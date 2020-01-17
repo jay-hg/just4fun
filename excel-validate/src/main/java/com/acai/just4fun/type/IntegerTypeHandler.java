@@ -7,6 +7,9 @@ public class IntegerTypeHandler extends BaseTypeHandler<Integer> {
     @Override
     public Integer getNullableResult(Row row, int columnIndex) {
         Cell cell = row.getCell(columnIndex);
+        if (cell == null) {
+            return null;
+        }
         Double num = cell.getNumericCellValue();
         return num.intValue();
     }

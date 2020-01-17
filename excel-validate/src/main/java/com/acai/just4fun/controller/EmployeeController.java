@@ -1,13 +1,10 @@
 package com.acai.just4fun.controller;
 
-import com.acai.just4fun.dto.BasicExcelDTO;
+import com.acai.just4fun.annotation.ExcelCol;
 import com.acai.just4fun.dto.EmployeeDTO;
 import com.acai.just4fun.dto.HeroPropertiesDTO;
-import com.acai.just4fun.enums.excel.EmployeeExcelEnum;
-import com.acai.just4fun.enums.excel.HeroPropertiesExcelEnum;
-import com.acai.just4fun.enums.HeroTypeEnum;
 import com.acai.just4fun.type.TypeHandlerRegistry;
-import org.apache.poi.ss.usermodel.Cell;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -22,7 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @RestController
 @RequestMapping("/emp")
 public class EmployeeController {
@@ -87,9 +88,6 @@ public class EmployeeController {
     private final static TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
 
     private <T> List<T> generateDtoList(MultipartFile file, Class clazz) throws IllegalAccessException, InstantiationException {
-        if (!BasicExcelDTO.class.isAssignableFrom(clazz)) {
-            throw new IllegalStateException("dto应实现BasicExcelDTO");
-        }
         if (file.isEmpty()) {
             throw new IllegalArgumentException("文件为空");
         }
@@ -113,21 +111,20 @@ public class EmployeeController {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 field.setAccessible(true);
-                int idx = 0;
 
-                if (clazz == EmployeeDTO.class) {
-                    idx = EmployeeExcelEnum.getIndex(field.getName());
-                } else {
-                    idx = HeroPropertiesExcelEnum.getIndex(field.getName());
+                ExcelCol excelCol = field.getAnnotation(ExcelCol.class);
+                if (excelCol == null) {
+                    continue;
                 }
-                Cell cell = row.getCell(idx);
+                int idx = excelCol.value();
 
                 //填值
-                if (cell != null) {
-                    Object value = typeHandlerRegistry.getMappingTypeHandler(field.getType()).getResult(row, idx);
-                    field.set(dto,value);
+                if (typeHandlerRegistry.hasTypeHandler(field.getType())) {
+                    Object value = typeHandlerRegistry.getTypeHandler(field.getType()).getResult(row, idx);
+                    field.set(dto, value);
+                } else {
+                    log.warn("找不到{}对应的type处理器",field.getType());
                 }
-
             }
 
             dtoList.add(dto);
