@@ -2,7 +2,7 @@ package com.acai.just4fun.dto;
 
 
 import com.acai.just4fun.annotation.Company;
-import com.acai.just4fun.annotation.ExcelCol;
+import com.acai.just4fun.type.ExcelCol;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;

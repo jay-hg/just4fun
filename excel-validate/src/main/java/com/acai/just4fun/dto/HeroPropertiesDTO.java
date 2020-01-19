@@ -1,6 +1,6 @@
 package com.acai.just4fun.dto;
 
-import com.acai.just4fun.annotation.ExcelCol;
+import com.acai.just4fun.type.ExcelCol;
 import com.acai.just4fun.enums.HeroTypeEnum;
 import lombok.Data;
 

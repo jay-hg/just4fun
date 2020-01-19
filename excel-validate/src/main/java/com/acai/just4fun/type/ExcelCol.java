@@ -1,4 +1,4 @@
-package com.acai.just4fun.annotation;
+package com.acai.just4fun.type;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
